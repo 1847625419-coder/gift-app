@@ -1,2 +1,1 @@
-# gift-app
-直播礼物生成App
+# Gift App - 直播礼物生成App
