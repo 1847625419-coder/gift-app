@@ -1,5 +1,6 @@
 {
   "framework": null,
-  "buildCommand": "npm install && npm run web",
-  "outputDirectory": ".next"
+  "buildCommand": "npx expo export --platform web",
+  "outputDirectory": "dist",
+  "installCommand": "npm install --ignore-scripts"
 }
