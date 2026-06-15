@@ -24,62 +24,66 @@
 @layer theme {
   :root {
     @variant light {
-      /* Base Colors */
-      --background: #fafafa;
-      --foreground: var(--eclipse);
+      /* === 中东沙漠风格配色 === */
+      /* Base Colors - 沙漠奢华主题 */
+      --background: #FFFDF7;           /* 象牙白 - 温暖底色 */
+      --foreground: #2C2416;           /* 深棕 - 主文字 */
 
-      /* Surface: Used for non-overlay components (cards, accordions, disclosure groups) */
-      --surface: var(--white);
+      /* Surface: Used for non-overlay components */
+      --surface: #FFF9F0;              /* 暖白 - 页面卡片 */
       --surface-foreground: var(--foreground);
 
-      /* Overlay: Used for floating/overlay components (dialogs, popovers, modals, menus) */
-      --overlay: var(--white);
+      /* Overlay: Used for floating/overlay components */
+      --overlay: #FFFFFF;
       --overlay-foreground: var(--foreground);
 
-      --muted: oklch(0.5517 0.0138 285.94);
+      --muted: #6B5D4D;               /* 中棕 - 次要文字 */
 
-      --default: oklch(94% 0.001 286.375);
-      --default-foreground: var(--eclipse);
+      --default: #F5F0E8;             /* 浅米灰 - 输入框背景 */
+      --default-foreground: var(--foreground);
 
-      --accent: oklch(0.6204 0.195 253.83);
-      --accent-foreground: var(--snow);
+      /* 主色：沙漠金色 */
+      --accent: #B8860B;              /* 暗金色 */
+      --accent-foreground: #FFFFFF;
 
       /* Form Fields */
-      --field-background: var(--white);
-      --field-foreground: oklch(0.2103 0.0059 285.89);
-      --field-placeholder: var(--muted);
-      --field-border: transparent; /* no border by default on form fields */
+      --field-background: #F5F0E8;    /* 浅米灰 */
+      --field-foreground: #2C2416;
+      --field-placeholder: #6B5D4D;
+      --field-border: transparent;
 
       /* Status Colors */
-      --success: oklch(0.7329 0.1935 150.81);
-      --success-foreground: var(--eclipse);
+      --success: #22c55e;
+      --success-foreground: #FFFFFF;
 
-      --warning: oklch(0.7819 0.1585 72.33);
-      --warning-foreground: var(--eclipse);
+      --warning: #f59e0b;
+      --warning-foreground: #FFFFFF;
 
-      --danger: oklch(0.6532 0.2328 25.74);
-      --danger-foreground: var(--snow);
+      --danger: #ef4444;
+      --danger-foreground: #FFFFFF;
 
       /* Component Colors */
-      --segment: var(--white);
-      --segment-foreground: var(--eclipse);
+      --segment: #FFFFFF;
+      --segment-foreground: var(--foreground);
 
       /* Misc Colors */
-      --border: oklch(90% 0.004 286.32);
-      --separator: oklch(74% 0.004 286.32);
-      --focus: var(--accent);
+      --border: #E8DED0;              /* 浅金边框 */
+      --separator: #D4C5B5;           /* 金色分隔线 */
+      --focus: #B8860B;
       --link: var(--foreground);
 
-      /* Shadows */
+      /* Shadows - 有色阴影（使用金色调） */
       --surface-shadow:
-        0 2px 4px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.06),
-        0 0 1px 0 rgba(0, 0, 0, 0.06);
+        0 4px 16px rgba(44, 36, 22, 0.08);
       --overlay-shadow:
-        0 2px 8px 0 rgba(0, 0, 0, 0.04), 0 -6px 12px 0 rgba(0, 0, 0, 0.02),
-        0 14px 28px 0 rgba(0, 0, 0, 0.06);
+        0 10px 30px rgba(44, 36, 22, 0.12);
       --field-shadow:
-        0 2px 4px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.06),
-        0 0 1px 0 rgba(0, 0, 0, 0.06);
+        0 2px 4px rgba(44, 36, 22, 0.04);
+
+      /* 自定义：中东风格金色 */
+      --color-gold: #B8860B;          /* 暗金色 */
+      --color-gold-light: #D4AF37;    /* 亮金色 */
+      --color-gold-pale: #F5E6C8;     /* 浅金色 */
     }
 
     @variant dark {
