@@ -1,16 +1,7 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "nixpacks": {
-      "node_version": "22",
-      "install": {
-        "command": "cd client && npm install"
-      },
-      "build": {
-        "command": "cd client && npm install && npx expo export --platform web"
-      }
-    }
+    "command": "curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs && cd client && npm install && npx expo export --platform web"
   },
   "deploy": {
     "numReplicas": 1,

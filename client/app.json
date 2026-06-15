@@ -15,10 +15,14 @@
     }
   },
   "web": {
-    "bundler": "metro",
-    "output": "single"
+    "favicon": "./assets/favicon.png",
+    "bundler": "metro"
+  },
+  "experiments": {
+    "typedRoutes": true
   },
   "plugins": [
     "expo-router"
-  ]
+  ],
+  "platforms": ["ios", "android", "web"]
 }
