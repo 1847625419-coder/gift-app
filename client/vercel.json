@@ -1,6 +1,5 @@
 {
-  "framework": null,
-  "buildCommand": "npx expo export --platform web",
+  "buildCommand": "npm run export-web",
   "outputDirectory": "dist",
-  "installCommand": "npm install --ignore-scripts"
+  "installCommand": "npm install"
 }
