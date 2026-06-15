@@ -4,7 +4,7 @@
     "builder": "NIXPACKS",
     "nixpacks": {
       "install": {
-        "command": "npm install"
+        "command": "cd client && npm install"
       },
       "build": {
         "command": "cd client && npm install && npx expo export --platform web"
