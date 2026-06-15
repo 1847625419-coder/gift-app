@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 - 中东沙漠金主题 === */
+      --color-primary:              #B8860B;        /* 暗金色 - 沙漠奢华感 */
+      --color-primary-container:    #F5E6C8;        /* 浅金 - 选中态背景 */
+      --color-on-primary:           #FFFFFF;        /* 白色文字 */
+      
+      /* === 背景 / 表面 === */
+      --color-background:                 #FFFDF7;        /* 象牙白 - 温暖底色 */
+      --color-surface-container-lowest:   #FFFFFF;        /* 纯白 - 最上层卡片 */
+      --color-surface:                    #FFF9F0;        /* 暖白 - 页面卡片 */
+      --color-surface-container:          #F5F0E8;        /* 浅米灰 - 输入框背景 */
+      --color-surface-container-high:     #EDE6DA;       /* 深米灰 - 高亮状态 */
+      --color-surface-container-highest:  #E5DDCB;       /* 更深米灰 - 最高层级 */
+      
+      /* === 文字 === */
+      --color-on-surface:           #2C2416;        /* 深棕 - 主文字 */
+      --color-on-surface-variant:   #6B5D4D;        /* 中棕 - 次要文字 */
+      
+      /* === 功能色 === */
+      --color-success:  #22c55e;
+      --color-error:    #ef4444;
+      --color-warning:  #f59e0b;
+      
+      /* === 边框 === */
+      --color-outline:          #D4C5B5;
+      --color-outline-variant:  #E8DED0;
+      
+      /* === 圆角 === */
+      --radius-sm:   0.5rem;     /* 8px */
+      --radius-md:   0.75rem;    /* 12px */
+      --radius-lg:   1rem;       /* 16px */
+      --radius-xl:   1.25rem;   /* 20px */
+      --radius-2xl:  1.5rem;     /* 24px */
+      --radius-full: 9999px;
+      
+      /* === 阴影 === */
+      --shadow-card:   0 4px 16px rgba(44,36,22,0.08);
+      --shadow-float:  0 10px 30px rgba(44,36,22,0.12);
+      --shadow-dialog: 0 25px 50px rgba(44,36,22,0.18);
+      
+      /* === 字体 === */
+      --font-sans: "Noto Sans SC", system-ui, sans-serif;
+    }
+  </style>
+
+  <style>
+    /* 中东几何花纹装饰 - SVG背景 */
+    .pattern-geometric {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L37.32 15H52L40.34 24.27L45.86 40L30 30L14.14 40L19.66 24.27L8 15H22.68L30 0Z' fill='%23B8860B' fill-opacity='0.03'/%3E%3C/svg%3E");
+    }
+    
+    /* 金色光晕效果 */
+    .glow-gold {
+      box-shadow: 0 0 20px rgba(184,134,11,0.15);
+    }
+    
+    /* 阿拉伯花纹边框 */
+    .border-pattern {
+      border-image: repeating-linear-gradient(
+        90deg,
+        #B8860B 0px,
+        #B8860B 4px,
+        transparent 4px,
+        transparent 8px
+      ) 1;
+    }
+    
+    body {
+      min-height: max(812px, 100dvh);
+      font-family: "Noto Sans SC", system-ui, sans-serif;
+      background-color: #FFFDF7;
+    }
+    
+    /* 禁止选中文本 */
+    * {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans pattern-geometric">
+
+  <!-- @nav:start 导航组件，不需要的页面则不要复制此段 -->
+  <!-- 主 Agent 在此处生成实际的导航 HTML 代码（header / TabBar 等） -->
+  <!-- @nav:end 导航组件，不需要的页面则不要复制此段 -->
+
+  <main class="flex-1">
+    <!-- @main-content:start -->
+    <!-- @main-content:end -->
+  </main>
+
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 - 中东沙漠金主题 === */
+      --color-primary:              #B8860B;        /* 暗金色 - 沙漠奢华感 */
+      --color-primary-container:    #F5E6C8;        /* 浅金 - 选中态背景 */
+      --color-on-primary:           #FFFFFF;        /* 白色文字 */
+      
+      /* === 背景 / 表面 === */
+      --color-background:                 #FFFDF7;        /* 象牙白 - 温暖底色 */
+      --color-surface-container-lowest:   #FFFFFF;        /* 纯白 - 最上层卡片 */
+      --color-surface:                    #FFF9F0;        /* 暖白 - 页面卡片 */
+      --color-surface-container:          #F5F0E8;        /* 浅米灰 - 输入框背景 */
+      --color-surface-container-high:     #EDE6DA;       /* 深米灰 - 高亮状态 */
+      --color-surface-container-highest:  #E5DDCB;       /* 更深米灰 - 最高层级 */
+      
+      /* === 文字 === */
+      --color-on-surface:           #2C2416;        /* 深棕 - 主文字 */
+      --color-on-surface-variant:   #6B5D4D;        /* 中棕 - 次要文字 */
+      
+      /* === 功能色 === */
+      --color-success:  #22c55e;
+      --color-error:    #ef4444;
+      --color-warning:  #f59e0b;
+      
+      /* === 边框 === */
+      --color-outline:          #D4C5B5;
+      --color-outline-variant:  #E8DED0;
+      
+      /* === 圆角 === */
+      --radius-sm:   0.5rem;     /* 8px */
+      --radius-md:   0.75rem;    /* 12px */
+      --radius-lg:   1rem;       /* 16px */
+      --radius-xl:   1.25rem;   /* 20px */
+      --radius-2xl:  1.5rem;     /* 24px */
+      --radius-full: 9999px;
+      
+      /* === 阴影 === */
+      --shadow-card:   0 4px 16px rgba(44,36,22,0.08);
+      --shadow-float:  0 10px 30px rgba(44,36,22,0.12);
+      --shadow-dialog: 0 25px 50px rgba(44,36,22,0.18);
+      
+      /* === 字体 === */
+      --font-sans: "Noto Sans SC", system-ui, sans-serif;
+    }
+  </style>
+
+  <style>
+    /* 中东几何花纹装饰 - SVG背景 */
+    .pattern-geometric {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L37.32 15H52L40.34 24.27L45.86 40L30 30L14.14 40L19.66 24.27L8 15H22.68L30 0Z' fill='%23B8860B' fill-opacity='0.03'/%3E%3C/svg%3E");
+    }
+    
+    /* 金色光晕效果 */
+    .glow-gold {
+      box-shadow: 0 0 20px rgba(184,134,11,0.15);
+    }
+    
+    /* 阿拉伯花纹边框 */
+    .border-pattern {
+      border-image: repeating-linear-gradient(
+        90deg,
+        #B8860B 0px,
+        #B8860B 4px,
+        transparent 4px,
+        transparent 8px
+      ) 1;
+    }
+    
+    /* 阿拉伯星芒装饰 */
+    .star-ornament::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 16px;
+      background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    }
+    
+    body {
+      min-height: max(812px, 100dvh);
+      font-family: "Noto Sans SC", system-ui, sans-serif;
+      background-color: #FFFDF7;
+    }
+    
+    /* 禁止选中文本 */
+    * {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    /* 横向滚动隐藏滚动条 */
+    .scroll-hide-bar::-webkit-scrollbar {
+      display: none;
+    }
+    .scroll-hide-bar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    /* IP形象装饰框 */
+    .ip-frame {
+      position: relative;
+      border: 3px solid transparent;
+      background: linear-gradient(#FFF9F0, #FFF9F0) padding-box,
+                  linear-gradient(135deg, #D4AF37, #B8860B, #D4AF37, #B8860B) border-box;
+      border-radius: 50%;
+    }
+    
+    .ip-frame::before,
+    .ip-frame::after {
+      content: '';
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    }
+    .ip-frame::before {
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .ip-frame::after {
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans pattern-geometric">
+
+  <!-- @nav:start 底部TabBar导航 -->
+  <nav id="tabbar" class="fixed bottom-0 left-0 right-0 z-40 bg-surface
+              flex justify-around items-center h-14 pb-[env(safe-area-inset-bottom)]
+              border-t border-outline-variant/20">
+    <a href="#" id="nav-home" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-primary"
+       aria-current="page">
+      <i data-lucide="home" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">首页</span>
+    </a>
+    <a href="#" id="nav-create" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant
+                       hover:text-on-surface transition-colors">
+      <i data-lucide="sparkles" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">创作</span>
+    </a>
+    <a href="#" id="nav-gallery" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant
+                       hover:text-on-surface transition-colors">
+      <i data-lucide="folder-heart" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">我的作品</span>
+    </a>
+  </nav>
+  <!-- @nav:end 底部TabBar导航 -->
+
+  <main class="flex-1 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
+    <!-- @main-content:start -->
+    
+    <!-- 顶部Logo区 -->
+    <header class="sticky top-0 z-30 bg-background/95 backdrop-blur-sm">
+      <div class="px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <!-- Logo图标 -->
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-amber-600 flex items-center justify-center shadow-card">
+            <i data-lucide="gift" class="w-5 h-5 text-on-primary"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold text-on-surface leading-tight">礼物工坊</h1>
+            <p class="text-[10px] text-on-surface-variant">Gift Workshop</p>
+          </div>
+        </div>
+        <!-- 斋月徽章 -->
+        <div class="flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/10">
+          <i data-lucide="moon" class="w-3.5 h-3.5 text-primary"></i>
+          <span class="text-xs font-medium text-primary">Ramadan</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- IP形象展示区 -->
+    <section class="px-4 py-6 flex flex-col items-center">
+      <div class="relative">
+        <!-- 阿拉伯花纹装饰背景 -->
+        <div class="absolute inset-0 -m-4 flex items-center justify-center">
+          <div class="w-48 h-48 opacity-30">
+            <svg viewBox="0 0 200 200" class="w-full h-full">
+              <polygon points="100,10 120,80 190,80 135,120 155,190 100,150 45,190 65,120 10,80 80,80" 
+                       fill="none" stroke="#B8860B" stroke-width="1" opacity="0.5"/>
+              <polygon points="100,30 115,75 160,75 125,105 140,150 100,125 60,150 75,105 40,75 85,75" 
+                       fill="none" stroke="#D4AF37" stroke-width="0.5" opacity="0.4"/>
+            </svg>
+          </div>
+        </div>
+        
+        <!-- IP形象容器 -->
+        <div class="ip-frame w-40 h-40 flex items-center justify-center glow-gold relative">
+          <!-- 小老虎IP形象 - 使用emoji代替实际图片 -->
+          <div class="text-center">
+            <div class="text-6xl mb-1">🐯</div>
+            <p class="text-xs font-semibold text-primary">软萌小老虎</p>
+          </div>
+        </div>
+        
+        <!-- 两侧星芒装饰 -->
+        <div class="absolute top-1/2 -left-8 -translate-y-1/2 w-6 h-6">
+          <svg viewBox="0 0 24 24" class="w-full h-full text-primary/40">
+            <polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="absolute top-1/2 -right-8 -translate-y-1/2 w-6 h-6">
+          <svg viewBox="0 0 24 24" class="w-full h-full text-primary/40">
+            <polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="currentColor"/>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- 欢迎语 -->
+      <div class="mt-4 text-center">
+        <p class="text-sm text-on-surface-variant">مرحباً بك · 欢迎来到礼物王国</p>
+        <p class="text-xs text-on-surface-variant/70 mt-1">创造独特的直播礼物，表达你的心意</p>
+      </div>
+    </section>
+
+    <!-- 快捷入口区 -->
+    <section class="px-4 py-4">
+      <div class="grid grid-cols-4 gap-3">
+        <!-- 表情礼物 -->
+        <a href="#" id="entry-emotion" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-surface hover:bg-surface-container transition-colors active:scale-95">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center shadow-md">
+            <i data-lucide="smile" class="w-6 h-6 text-white"></i>
+          </div>
+          <span class="text-xs font-medium text-on-surface">表情礼物</span>
+        </a>
+        
+        <!-- 动作特效 -->
+        <a href="#" id="entry-effect" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-surface hover:bg-surface-container transition-colors active:scale-95">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center shadow-md">
+            <i data-lucide="wand-2" class="w-6 h-6 text-white"></i>
+          </div>
+          <span class="text-xs font-medium text-on-surface">动作特效</span>
+        </a>
+        
+        <!-- 节日专题 -->
+        <a href="#" id="entry-festival" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-surface hover:bg-surface-container transition-colors active:scale-95">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-md">
+            <i data-lucide="calendar-heart" class="w-6 h-6 text-white"></i>
+          </div>
+          <span class="text-xs font-medium text-on-surface">节日专题</span>
+        </a>
+        
+        <!-- 自定义创作 -->
+        <a href="#" id="entry-create" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-surface hover:bg-surface-container transition-colors active:scale-95">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md">
+            <i data-lucide="pencil-plus" class="w-6 h-6 text-white"></i>
+          </div>
+          <span class="text-xs font-medium text-on-surface">自定义</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- 精选模板区 -->
+    <section class="py-4">
+      <div class="px-4 flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-1 h-5 rounded-full bg-gradient-to-b from-primary to-amber-400"></div>
+          <h2 class="text-base font-bold text-on-surface">精选模板</h2>
+          <span class="px-2 py-0.5 rounded-full bg-primary/10 text-[10px] font-semibold text-primary">HOT</span>
+        </div>
+        <a href="#" class="text-xs text-primary font-medium flex items-center gap-1">
+          查看全部
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+      
+      <!-- 横向滚动卡片列表 -->
+      <div class="flex gap-3 overflow-x-auto scroll-hide-bar px-4 pb-2">
+        <!-- 模板卡片1 - 爱心发射 -->
+        <a href="template-detail.html?id=1" id="template-1" class="flex-shrink-0 w-36 rounded-2xl bg-surface overflow-hidden shadow-card hover:shadow-float transition-shadow active:scale-95">
+          <div class="aspect-square bg-gradient-to-br from-pink-100 to-rose-200 flex items-center justify-center relative overflow-hidden">
+            <div class="text-5xl">💖</div>
+            <!-- 角落装饰 -->
+            <div class="absolute top-2 right-2 w-4 h-4 text-pink-300/60">
+              <svg viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="currentColor"/></svg>
+            </div>
+          </div>
+          <div class="p-3">
+            <p class="text-sm font-semibold text-on-surface truncate">爱心发射</p>
+            <p class="text-[10px] text-on-surface-variant mt-0.5">表情礼物 · 888金币</p>
+          </div>
+        </a>
+        
+        <!-- 模板卡片2 - 沙漠玫瑰 -->
+        <a href="template-detail.html?id=2" id="template-2" class="flex-shrink-0 w-36 rounded-2xl bg-surface overflow-hidden shadow-card hover:shadow-float transition-shadow active:scale-95">
+          <div class="aspect-square bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center relative overflow-hidden">
+            <div class="text-5xl">🌹</div>
+            <div class="absolute top-2 right-2 w-4 h-4 text-amber-400/60">
+              <svg viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="currentColor"/></svg>
+            </div>
+          </div>
+          <div class="p-3">
+            <p class="text-sm font-semibold text-on-surface truncate">沙漠玫瑰</p>
+            <p class="text-[10px] text-on-surface-variant mt-0.5">节日专题 · 1288金币</p>
+          </div>
+        </a>
+        
+        <!-- 模板卡片3 - 金币雨 -->
+        <a href="template-detail.html?id=3" id="template-3" class="flex-shrink-0 w-36 rounded-2xl bg-surface overflow-hidden shadow-card hover:shadow-float transition-shadow active:scale-95">
+          <div class="aspect-square bg-gradient-to-br from-yellow-100 to-amber-200 flex items-center justify-center relative overflow-hidden">
+            <div class="text-5xl">🪙</div>
+            <div class="absolute top-2 right-2 w-4 h-4 text-amber-500/60">
+              <svg viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="currentColor"/></svg>
+            </div>
+          </div>
+          <div class="p-3">
+            <p class="text-sm font-semibold text-on-surface truncate">金币雨</p>
+            <p class="text-[10px] text-on-surface-variant mt-0.5">动作特效 · 2000金币</p>
+          </div>
+        </a>
+        
+        <!-- 模板卡片4 - 星星雨 -->
+        <a href="template-detail.html?id=4" id="template-4" class="flex-shrink-0 w-36 rounded-2xl bg-surface overflow-hidden shadow-card hover:shadow-float transition-shadow active:scale-95">
+          <div class="aspect-square bg-gradient-to-br from-indigo-100 to-purple-200 flex items-center justify-center relative overflow-hidden">
+            <div class="text-5xl">⭐</div>
+            <div class="absolute top-2 right-2 w-4 h-4 text-indigo-400/60">
+              <svg viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="currentColor"/></svg>
+            </div>
+          </div>
+          <div class="p-3">
+            <p class="text-sm font-semibold text-on-surface truncate">星星雨</p>
+            <p class="text-[10px] text-on-surface-variant mt-0.5">动作特效 · 1888金币</p>
+          </div>
+        </a>
+        
+        <!-- 模板卡片5 - 阿拉伯花纹 -->
+        <a href="template-detail.html?id=5" id="template-5" class="flex-shrink-0 w-36 rounded-2xl bg-surface overflow-hidden shadow-card hover:shadow-float transition-shadow active:scale-95">
+          <div class="aspect-square bg-gradient-to-br from-primary/20 to-amber-300/30 flex items-center justify-center relative overflow-hidden">
+            <div class="text-5xl">🏺</div>
+            <div class="absolute top-2 right-2 w-4 h-4 text-primary/40">
+              <svg viewBox="0 0 24 24"><polygon points="12,2 15,9 22,9 16,14 18,22 12,17 6,22 8,14 2,9 9,9" fill="currentColor"/></svg>
+            </div>
+          </div>
+          <div class="p-3">
+            <p class="text-sm font-semibold text-on-surface truncate">阿拉伯花纹</p>
+            <p class="text-[10px] text-on-surface-variant mt-0.5">节日专题 · 2888金币</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- 热门创作者区 -->
+    <section class="py-4 px-4">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-1 h-5 rounded-full bg-gradient-to-b from-primary to-amber-400"></div>
+          <h2 class="text-base font-bold text-on-surface">热门创作者</h2>
+        </div>
+      </div>
+      
+      <div class="flex gap-3 overflow-x-auto scroll-hide-bar pb-1">
+        <!-- 创作者1 -->
+        <div class="flex-shrink-0 flex flex-col items-center gap-2">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+            阿
+          </div>
+          <span class="text-xs text-on-surface">阿拉伯公主</span>
+          <span class="text-[10px] text-on-surface-variant">1.2k作品</span>
+        </div>
+        
+        <!-- 创作者2 -->
+        <div class="flex-shrink-0 flex flex-col items-center gap-2">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+            沙
+          </div>
+          <span class="text-xs text-on-surface">沙漠商人</span>
+          <span class="text-[10px] text-on-surface-variant">956作品</span>
+        </div>
+        
+        <!-- 创作者3 -->
+        <div class="flex-shrink-0 flex flex-col items-center gap-2">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+            星
+          </div>
+          <span class="text-xs text-on-surface">星空旅者</span>
+          <span class="text-[10px] text-on-surface-variant">2.3k作品</span>
+        </div>
+        
+        <!-- 创作者4 -->
+        <div class="flex-shrink-0 flex flex-col items-center gap-2">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+            骆
+          </div>
+          <span class="text-xs text-on-surface">骆驼商队</span>
+          <span class="text-[10px] text-on-surface-variant">888作品</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- @main-content:end -->
+  </main>
+
+  <script>
+    // 导航辅助函数
+    function navPush(route) {
+      console.log('[原型演示] PUSH 到: ' + route);
+      window.location.href = route;
+    }
+    
+    function navReplace(route) {
+      console.log('[原型演示] REPLACE 为: ' + route);
+      window.location.replace(route);
+    }
+    
+    function navReset(route) {
+      console.log('[原型演示] RESET 到: ' + route);
+      window.location.href = route;
+    }
+    
+    function navBack() {
+      console.log('[原型演示] BACK 返回上一页');
+      if(window.history.length > 1) window.history.back();
+    }
+    
+    $(function() {
+      // TabBar 切换
+      $('#nav-home').on('click', function(e) {
+        e.preventDefault();
+        navReset('home.html');
+      });
+      
+      $('#nav-create').on('click', function(e) {
+        e.preventDefault();
+        navReset('create.html');
+      });
+      
+      $('#nav-gallery').on('click', function(e) {
+        e.preventDefault();
+        navReset('gallery.html');
+      });
+      
+      // 快捷入口点击
+      $('#entry-emotion').on('click', function(e) {
+        e.preventDefault();
+        console.log('进入表情礼物分类');
+        // 后续应跳转到表情礼物列表页
+        // navPush('category.html?type=emotion');
+      });
+      
+      $('#entry-effect').on('click', function(e) {
+        e.preventDefault();
+        console.log('进入动作特效分类');
+        // 后续应跳转到动作特效列表页
+        // navPush('category.html?type=effect');
+      });
+      
+      $('#entry-festival').on('click', function(e) {
+        e.preventDefault();
+        console.log('进入节日专题');
+        // 后续应跳转到节日专题页
+        // navPush('festival.html');
+      });
+      
+      $('#entry-create').on('click', function(e) {
+        e.preventDefault();
+        navReset('create.html');
+      });
+      
+      // 模板卡片点击
+      $('.scroll-hide-bar a').on('click', function(e) {
+        // 允许默认跳转，已在href中定义
+      });
+    });
+  </script>
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>

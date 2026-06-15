@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 - 中东沙漠金主题 === */
+      --color-primary:              #B8860B;        /* 暗金色 - 沙漠奢华感 */
+      --color-primary-container:    #F5E6C8;        /* 浅金 - 选中态背景 */
+      --color-on-primary:           #FFFFFF;        /* 白色文字 */
+      
+      /* === 背景 / 表面 === */
+      --color-background:                 #FFFDF7;        /* 象牙白 - 温暖底色 */
+      --color-surface-container-lowest:   #FFFFFF;        /* 纯白 - 最上层卡片 */
+      --color-surface:                    #FFF9F0;        /* 暖白 - 页面卡片 */
+      --color-surface-container:          #F5F0E8;        /* 浅米灰 - 输入框背景 */
+      --color-surface-container-high:     #EDE6DA;       /* 深米灰 - 高亮状态 */
+      --color-surface-container-highest:  #E5DDCB;       /* 更深米灰 - 最高层级 */
+      
+      /* === 文字 === */
+      --color-on-surface:           #2C2416;        /* 深棕 - 主文字 */
+      --color-on-surface-variant:   #6B5D4D;        /* 中棕 - 次要文字 */
+      
+      /* === 功能色 === */
+      --color-success:  #22c55e;
+      --color-error:    #ef4444;
+      --color-warning:  #f59e0b;
+      
+      /* === 边框 === */
+      --color-outline:          #D4C5B5;
+      --color-outline-variant:  #E8DED0;
+      
+      /* === 圆角 === */
+      --radius-sm:   0.5rem;     /* 8px */
+      --radius-md:   0.75rem;    /* 12px */
+      --radius-lg:   1rem;       /* 16px */
+      --radius-xl:   1.25rem;   /* 20px */
+      --radius-2xl:  1.5rem;     /* 24px */
+      --radius-full: 9999px;
+      
+      /* 阴影 */
+      --shadow-card:   0 4px 16px rgba(44,36,22,0.08);
+      --shadow-float:  0 10px 30px rgba(44,36,22,0.12);
+      --shadow-dialog: 0 25px 50px rgba(44,36,22,0.18);
+      
+      /* === 字体 === */
+      --font-sans: "Noto Sans SC", system-ui, sans-serif;
+    }
+  </style>
+
+  <style>
+    /* 中东几何花纹装饰 - SVG背景 */
+    .pattern-geometric {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L37.32 15H52L40.34 24.27L45.86 40L30 30L14.14 40L19.66 24.27L8 15H22.68L30 0Z' fill='%23B8860B' fill-opacity='0.03'/%3E%3C/svg%3E");
+    }
+    
+    /* 金色光晕效果 */
+    .glow-gold {
+      box-shadow: 0 0 20px rgba(184,134,11,0.15);
+    }
+    
+    /* 阿拉伯花纹边框 */
+    .border-pattern {
+      border-image: repeating-linear-gradient(
+        90deg,
+        #B8860B 0px,
+        #B8860B 4px,
+        transparent 4px,
+        transparent 8px
+      ) 1;
+    }
+    
+    body {
+      min-height: max(812px, 100dvh);
+      font-family: "Noto Sans SC", system-ui, sans-serif;
+      background-color: #FFFDF7;
+    }
+    
+    /* 禁止选中文本 */
+    * {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* 瀑布流布局 */
+    .waterfall-grid {
+      column-count: 2;
+      column-gap: 0.75rem;
+    }
+    
+    .waterfall-item {
+      break-inside: avoid;
+      margin-bottom: 0.75rem;
+    }
+
+    /* 卡片悬浮效果 */
+    .gift-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .gift-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(44,36,22,0.12);
+    }
+
+    /* 卡片右上角操作按钮 */
+    .card-action {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .gift-card:hover .card-action {
+      opacity: 1;
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans pattern-geometric">
+
+  <!-- @nav:start 导航组件 -->
+  <!-- 顶部 Header -->
+  <header class="bg-background sticky top-0 z-40 h-14 flex items-center justify-between px-4">
+    <div class="w-10"></div>
+    <h1 class="text-base font-semibold text-on-surface">我的作品</h1>
+    <button id="btn-filter" class="w-10 h-10 flex items-center justify-center text-on-surface-variant rounded-full hover:bg-surface-container active:bg-surface-container-high transition-colors" aria-label="筛选">
+      <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+    </button>
+  </header>
+  <!-- @nav:end 导航组件 -->
+
+  <main class="overflow-y-auto pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
+    
+    <!-- 作品统计区域 -->
+    <div class="px-4 pt-4 pb-2">
+      <div class="bg-surface rounded-xl shadow-card p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+            <i data-lucide="gift" class="w-6 h-6 text-primary"></i>
+          </div>
+          <div>
+            <p class="text-sm text-on-surface-variant">已生成礼物</p>
+            <p class="text-2xl font-bold text-primary mt-0.5">12</p>
+          </div>
+        </div>
+        <!-- 中东风格装饰线 -->
+        <div class="h-8 w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent"></div>
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-primary-container rounded-xl flex items-center justify-center">
+            <i data-lucide="star" class="w-6 h-6 text-primary"></i>
+          </div>
+          <div>
+            <p class="text-sm text-on-surface-variant">收藏作品</p>
+            <p class="text-2xl font-bold text-primary mt-0.5">3</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 筛选标签 -->
+    <div class="px-4 pb-3">
+      <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+        <button class="filter-tag px-3 py-1.5 rounded-full text-sm font-medium bg-primary text-white whitespace-nowrap" data-filter="all">全部</button>
+        <button class="filter-tag px-3 py-1.5 rounded-full text-sm font-medium bg-surface-container text-on-surface-variant whitespace-nowrap" data-filter="gift">礼物卡</button>
+        <button class="filter-tag px-3 py-1.5 rounded-full text-sm font-medium bg-surface-container text-on-surface-variant whitespace-nowrap" data-filter="invitation">邀请函</button>
+        <button class="filter-tag px-3 py-1.5 rounded-full text-sm font-medium bg-surface-container text-on-surface-variant whitespace-nowrap" data-filter="memorabilia">纪念品</button>
+      </div>
+    </div>
+
+    <!-- 瀑布流网格 -->
+    <div class="px-4 pb-4">
+      <div id="gallery-grid" class="waterfall-grid">
+        
+        <!-- 列表-作品1：母亲节礼物卡 -->
+        <div class="waterfall-item">
+          <div id="card-1" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="1" data-category="gift">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=400&h=500&fit=crop" alt="母亲节礼物卡" data-category="礼物卡" class="w-full h-auto object-cover">
+              <!-- 右上角操作按钮 -->
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="1">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="1">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <!-- 类型标签 -->
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">礼物卡</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">母亲节礼物卡</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年5月10日</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表-作品2：生日邀请函 -->
+        <div class="waterfall-item">
+          <div id="card-2" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="2" data-category="invitation">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=350&fit=crop" alt="生日邀请函" data-category="邀请函" class="w-full h-auto object-cover">
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="2">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="2">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">邀请函</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">生日邀请函</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年5月8日</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表-作品3：婚礼纪念品 -->
+        <div class="waterfall-item">
+          <div id="card-3" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="3" data-category="memorabilia">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=550&fit=crop" alt="婚礼纪念品" data-category="纪念品" class="w-full h-auto object-cover">
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="3">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="3">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">纪念品</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">婚礼纪念品</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年5月5日</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表-作品4：开斋节礼物 -->
+        <div class="waterfall-item">
+          <div id="card-4" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="4" data-category="gift">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=400&h=400&fit=crop" alt="开斋节礼物" data-category="礼物卡" class="w-full h-auto object-cover">
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="4">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="4">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">礼物卡</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">开斋节礼物</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年4月20日</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表-作品5：宝宝满月宴邀请函 -->
+        <div class="waterfall-item">
+          <div id="card-5" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="5" data-category="invitation">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400&h=480&fit=crop" alt="宝宝满月宴邀请函" data-category="邀请函" class="w-full h-auto object-cover">
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="5">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="5">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">邀请函</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">宝宝满月宴邀请函</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年4月15日</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表-作品6：情人节纪念册 -->
+        <div class="waterfall-item">
+          <div id="card-6" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="6" data-category="memorabilia">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=450&fit=crop" alt="情人节纪念册" data-category="纪念品" class="w-full h-auto object-cover">
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="6">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="6">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">纪念品</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">情人节纪念册</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年2月14日</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表-作品7：企业年会邀请函 -->
+        <div class="waterfall-item">
+          <div id="card-7" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="7" data-category="invitation">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=400&h=380&fit=crop" alt="企业年会邀请函" data-category="邀请函" class="w-full h-auto object-cover">
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="7">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="7">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">邀请函</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">企业年会邀请函</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年1月20日</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表-作品8：乔迁新居礼物 -->
+        <div class="waterfall-item">
+          <div id="card-8" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="8" data-category="gift">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=520&fit=crop" alt="乔迁新居礼物" data-category="礼物卡" class="w-full h-auto object-cover">
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="8">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="8">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">礼物卡</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">乔迁新居礼物</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年1月10日</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表-作品9：毕业纪念品 -->
+        <div class="waterfall-item">
+          <div id="card-9" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="9" data-category="memorabilia">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?w=400&h=420&fit=crop" alt="毕业纪念品" data-category="纪念品" class="w-full h-auto object-cover">
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="9">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="9">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">纪念品</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">毕业纪念品</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年6月25日</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表-作品10：父亲节礼物卡 -->
+        <div class="waterfall-item">
+          <div id="card-10" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="10" data-category="gift">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1516589091625-a1d3f4c7c7f2?w=400&h=480&fit=crop" alt="父亲节礼物卡" data-category="礼物卡" class="w-full h-auto object-cover">
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="10">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="10">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">礼物卡</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">父亲节礼物卡</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年6月16日</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表-作品11：中秋节礼物 -->
+        <div class="waterfall-item">
+          <div id="card-11" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="11" data-category="gift">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=360&fit=crop" alt="中秋节礼物" data-category="礼物卡" class="w-full h-auto object-cover">
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="11">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="11">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">礼物卡</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">中秋节礼物</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年9月15日</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 列表-作品12：圣诞纪念品 -->
+        <div class="waterfall-item">
+          <div id="card-12" class="gift-card bg-surface rounded-xl shadow-card overflow-hidden relative" data-id="12" data-category="memorabilia">
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1512389142860-9c449e58a814?w=400&h=440&fit=crop" alt="圣诞纪念品" data-category="纪念品" class="w-full h-auto object-cover">
+              <div class="card-action absolute top-2 right-2 flex gap-1">
+                <button class="btn-download w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="下载" data-id="12">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button class="btn-delete w-8 h-8 bg-black/50 rounded-full flex items-center justify-center text-white hover:bg-black/70" aria-label="删除" data-id="12">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <span class="absolute bottom-2 left-2 px-2 py-0.5 bg-primary/90 text-white text-xs rounded-full">纪念品</span>
+            </div>
+            <div class="p-3">
+              <h3 class="text-sm font-semibold text-on-surface truncate">圣诞纪念品</h3>
+              <p class="text-xs text-on-surface-variant mt-1">2024年12月25日</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 底部 TabBar -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-surface flex justify-around items-center h-14 pb-[env(safe-area-inset-bottom)]">
+    <a href="home.html" id="nav-home" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="home" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">首页</span>
+    </a>
+    <a href="create.html" id="nav-create" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-on-surface-variant hover:text-on-surface transition-colors">
+      <i data-lucide="sparkles" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">创作</span>
+    </a>
+    <a href="gallery.html" id="nav-gallery" class="flex flex-col items-center gap-0.5 px-5 py-1.5 text-primary" aria-current="page">
+      <i data-lucide="image" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold tracking-wide">我的作品</span>
+    </a>
+  </nav>
+
+  <!-- 删除确认弹窗 -->
+  <div id="delete-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-end">
+    <div class="bg-surface rounded-t-2xl w-full p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+      <div class="w-12 h-1 bg-outline rounded-full mx-auto mb-6"></div>
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="trash-2" class="w-8 h-8 text-error"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-on-surface mb-2">确认删除</h3>
+        <p class="text-sm text-on-surface-variant">删除后将无法恢复，是否确定删除此作品？</p>
+      </div>
+      <div class="flex gap-3">
+        <button id="btn-cancel-delete" class="flex-1 py-3.5 rounded-xl text-base font-semibold bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors">取消</button>
+        <button id="btn-confirm-delete" class="flex-1 py-3.5 rounded-xl text-base font-semibold bg-error text-white hover:bg-error/90 transition-colors">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 筛选弹窗 -->
+  <div id="filter-modal" class="fixed inset-0 bg-black/50 z-50 hidden items-end">
+    <div class="bg-surface rounded-t-2xl w-full p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+      <div class="w-12 h-1 bg-outline rounded-full mx-auto mb-6"></div>
+      <h3 class="text-lg font-semibold text-on-surface mb-4">筛选条件</h3>
+      <div class="space-y-3">
+        <label class="flex items-center gap-3 p-3 bg-surface-container rounded-xl cursor-pointer">
+          <input type="checkbox" name="filter-type" value="all" checked class="w-5 h-5 accent-primary">
+          <span class="text-sm text-on-surface">全部作品</span>
+        </label>
+        <label class="flex items-center gap-3 p-3 bg-surface-container rounded-xl cursor-pointer">
+          <input type="checkbox" name="filter-type" value="gift" class="w-5 h-5 accent-primary">
+          <span class="text-sm text-on-surface">礼物卡</span>
+        </label>
+        <label class="flex items-center gap-3 p-3 bg-surface-container rounded-xl cursor-pointer">
+          <input type="checkbox" name="filter-type" value="invitation" class="w-5 h-5 accent-primary">
+          <span class="text-sm text-on-surface">邀请函</span>
+        </label>
+        <label class="flex items-center gap-3 p-3 bg-surface-container rounded-xl cursor-pointer">
+          <input type="checkbox" name="filter-type" value="memorabilia" class="w-5 h-5 accent-primary">
+          <span class="text-sm text-on-surface">纪念品</span>
+        </label>
+      </div>
+      <div class="flex gap-3 mt-6">
+        <button id="btn-filter-reset" class="flex-1 py-3.5 rounded-xl text-base font-semibold bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors">重置</button>
+        <button id="btn-filter-apply" class="flex-1 py-3.5 rounded-xl text-base font-semibold bg-primary text-white hover:opacity-90 transition-colors">应用</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 导航函数
+    function navPush(route) {
+      console.log('[原型演示] PUSH 到: ' + route);
+      window.location.href = route;
+    }
+
+    function navReplace(route) {
+      console.log('[原型演示] REPLACE 为: ' + route);
+      window.location.replace(route);
+    }
+
+    function navReset(route) {
+      console.log('[原型演示] RESET 到: ' + route);
+      window.location.href = route;
+    }
+
+    function navBack() {
+      console.log('[原型演示] BACK 返回上一页');
+      if (window.history.length > 1) window.history.back();
+    }
+
+    $(function() {
+      // TabBar 导航
+      $('#nav-home').on('click', function(e) {
+        e.preventDefault();
+        navReset('home.html');
+      });
+      $('#nav-create').on('click', function(e) {
+        e.preventDefault();
+        navReset('create.html');
+      });
+      $('#nav-gallery').on('click', function(e) {
+        e.preventDefault();
+        navReset('gallery.html');
+      });
+
+      // 删除功能 - 点击删除按钮显示确认弹窗
+      var pendingDeleteId = null;
+      $('.btn-delete').on('click', function(e) {
+        e.stopPropagation();
+        pendingDeleteId = $(this).data('id');
+        $('#delete-modal').removeClass('hidden').addClass('flex');
+        lucide.createIcons();
+      });
+
+      // 取消删除
+      $('#btn-cancel-delete').on('click', function() {
+        pendingDeleteId = null;
+        $('#delete-modal').removeClass('flex').addClass('hidden');
+      });
+
+      // 确认删除 - 删除卡片（此处只是前端演示，实际应调用API删除后刷新）
+      $('#btn-confirm-delete').on('click', function() {
+        if (pendingDeleteId) {
+          $('#card-' + pendingDeleteId).fadeOut(300, function() {
+            $(this).remove();
+            // 更新统计数量
+            var count = parseInt($('.waterfall-item').length);
+            if (count > 0) {
+              $('.waterfall-grid').prev().find('.text-2xl').first().text(count);
+            }
+          });
+        }
+        pendingDeleteId = null;
+        $('#delete-modal').removeClass('flex').addClass('hidden');
+      });
+
+      // 点击弹窗背景关闭
+      $('#delete-modal').on('click', function(e) {
+        if (e.target === this) {
+          pendingDeleteId = null;
+          $(this).removeClass('flex').addClass('hidden');
+        }
+      });
+
+      // 下载功能 - 点击下载按钮
+      $('.btn-download').on('click', function(e) {
+        e.stopPropagation();
+        var id = $(this).data('id');
+        console.log('下载作品: ' + id);
+        // 实际下载逻辑应调用API获取文件并触发下载
+        alert('正在下载作品 #' + id);
+      });
+
+      // 筛选按钮 - 显示筛选弹窗
+      $('#btn-filter').on('click', function() {
+        $('#filter-modal').removeClass('hidden').addClass('flex');
+        lucide.createIcons();
+      });
+
+      // 点击筛选弹窗背景关闭
+      $('#filter-modal').on('click', function(e) {
+        if (e.target === this) {
+          $(this).removeClass('flex').addClass('hidden');
+        }
+      });
+
+      // 筛选标签点击
+      $('.filter-tag').on('click', function() {
+        var filter = $(this).data('filter');
+        $('.filter-tag').removeClass('bg-primary text-white').addClass('bg-surface-container text-on-surface-variant');
+        $(this).removeClass('bg-surface-container text-on-surface-variant').addClass('bg-primary text-white');
+        
+        // 实际筛选逻辑：根据filter值显示/隐藏对应分类的作品
+        console.log('筛选: ' + filter);
+        $('.waterfall-item').each(function() {
+          var card = $(this).find('.gift-card');
+          if (filter === 'all' || card.data('category') === filter) {
+            $(this).show();
+          } else {
+            $(this).hide();
+          }
+        });
+      });
+
+      // 筛选弹窗-重置
+      $('#btn-filter-reset').on('click', function() {
+        $('input[name="filter-type"]').prop('checked', false);
+        $('input[name="filter-type"][value="all"]').prop('checked', true);
+      });
+
+      // 筛选弹窗-应用
+      $('#btn-filter-apply').on('click', function() {
+        var selected = $('input[name="filter-type"]:checked').val();
+        // 同步更新顶部标签
+        $('.filter-tag').removeClass('bg-primary text-white').addClass('bg-surface-container text-on-surface-variant');
+        $('.filter-tag[data-filter="' + selected + '"]').removeClass('bg-surface-container text-on-surface-variant').addClass('bg-primary text-white');
+        
+        // 执行筛选
+        $('.waterfall-item').each(function() {
+          var card = $(this).find('.gift-card');
+          if (selected === 'all' || card.data('category') === selected) {
+            $(this).show();
+          } else {
+            $(this).hide();
+          }
+        });
+        
+        $('#filter-modal').removeClass('flex').addClass('hidden');
+      });
+
+      // 卡片点击 - 进入详情页
+      $('.gift-card').on('click', function(e) {
+        // 排除按钮点击
+        if ($(e.target).closest('.btn-download, .btn-delete').length > 0) return;
+        var id = $(this).data('id');
+        navPush('template-detail.html?id=' + id);
+      });
+    });
+  </script>
+  <script>lucide.createIcons();</script>
+</body>
+
+</html>

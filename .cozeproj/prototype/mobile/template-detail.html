@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0" />
+
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/jquery/jquery-3.7.1.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/lucide/lucide-1.11.0.min.js"></script>
+  <script src="https://lf-code-agent.coze.cn/obj/x-ai-cn/cdn/tailwindcss/tailwindcss-browser-4.2.4.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* === 品牌色 - 中东沙漠金主题 === */
+      --color-primary:              #B8860B;        /* 暗金色 - 沙漠奢华感 */
+      --color-primary-container:    #F5E6C8;        /* 浅金 - 选中态背景 */
+      --color-on-primary:           #FFFFFF;        /* 白色文字 */
+      
+      /* === 背景 / 表面 === */
+      --color-background:                 #FFFDF7;        /* 象牙白 - 温暖底色 */
+      --color-surface-container-lowest:   #FFFFFF;        /* 纯白 - 最上层卡片 */
+      --color-surface:                    #FFF9F0;        /* 暖白 - 页面卡片 */
+      --color-surface-container:          #F5F0E8;        /* 浅米灰 - 输入框背景 */
+      --color-surface-container-high:     #EDE6DA;       /* 深米灰 - 高亮状态 */
+      --color-surface-container-highest:  #E5DDCB;       /* 更深米灰 - 最高层级 */
+      
+      /* === 文字 === */
+      --color-on-surface:           #2C2416;        /* 深棕 - 主文字 */
+      --color-on-surface-variant:   #6B5D4D;        /* 中棕 - 次要文字 */
+      
+      /* === 功能色 === */
+      --color-success:  #22c55e;
+      --color-error:    #ef4444;
+      --color-warning:  #f59e0b;
+      
+      /* === 边框 === */
+      --color-outline:          #D4C5B5;
+      --color-outline-variant:  #E8DED0;
+      
+      /* === 圆角 === */
+      --radius-sm:   0.5rem;     /* 8px */
+      --radius-md:   0.75rem;    /* 12px */
+      --radius-lg:   1rem;       /* 16px */
+      --radius-xl:   1.25rem;   /* 20px */
+      --radius-2xl:  1.5rem;     /* 24px */
+      --radius-full: 9999px;
+      
+      /* === 阴影 === */
+      --shadow-card:   0 4px 16px rgba(44,36,22,0.08);
+      --shadow-float:  0 10px 30px rgba(44,36,22,0.12);
+      --shadow-dialog: 0 25px 50px rgba(44,36,22,0.18);
+      
+      /* === 字体 === */
+      --font-sans: "Noto Sans SC", system-ui, sans-serif;
+    }
+  </style>
+
+  <style>
+    /* 中东几何花纹装饰 - SVG背景 */
+    .pattern-geometric {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L37.32 15H52L40.34 24.27L45.86 40L30 30L14.14 40L19.66 24.27L8 15H22.68L30 0Z' fill='%23B8860B' fill-opacity='0.03'/%3E%3C/svg%3E");
+    }
+    
+    /* 金色光晕效果 */
+    .glow-gold {
+      box-shadow: 0 0 20px rgba(184,134,11,0.15);
+    }
+    
+    /* 阿拉伯花纹边框 */
+    .border-pattern {
+      border-image: repeating-linear-gradient(
+        90deg,
+        #B8860B 0px,
+        #B8860B 4px,
+        transparent 4px,
+        transparent 8px
+      ) 1;
+    }
+    
+    body {
+      min-height: max(812px, 100dvh);
+      font-family: "Noto Sans SC", system-ui, sans-serif;
+      background-color: #FFFDF7;
+    }
+    
+    /* 禁止选中文本 */
+    * {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    /* 金色渐变按钮 */
+    .btn-gold-gradient {
+      background: linear-gradient(135deg, #D4A537 0%, #B8860B 50%, #8B6914 100%);
+      box-shadow: 0 4px 12px rgba(184,134,11,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+    
+    .btn-gold-gradient:hover {
+      background: linear-gradient(135deg, #E0B445 0%, #C99418 50%, #9A7518 100%);
+    }
+    
+    .btn-gold-gradient:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 6px rgba(184,134,11,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    
+    /* 金色边框装饰 */
+    .frame-gold {
+      border: 3px solid #B8860B;
+      box-shadow: 0 0 0 1px rgba(184,134,11,0.2), 0 8px 24px rgba(184,134,11,0.15);
+    }
+    
+    /* 阿拉伯花纹角饰 */
+    .corner-decoration::before,
+    .corner-decoration::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border: 2px solid #B8860B;
+      opacity: 0.6;
+    }
+    
+    .corner-decoration::before {
+      top: -2px;
+      left: -2px;
+      border-right: none;
+      border-bottom: none;
+      border-top-left-radius: 8px;
+    }
+    
+    .corner-decoration::after {
+      bottom: -2px;
+      right: -2px;
+      border-left: none;
+      border-top: none;
+      border-bottom-right-radius: 8px;
+    }
+    
+    /* 动画预览闪烁效果 */
+    @keyframes shimmer {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+    
+    .animating {
+      animation: shimmer 2s ease-in-out infinite;
+    }
+  </style>
+
+  <!-- 图片兜底 -->
+  <script>
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (img.tagName !== 'IMG' || img.dataset.fallback) return;
+      img.dataset.fallback = '1';
+      const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const cat = img.getAttribute('data-category') || '其他';
+      const alt = img.getAttribute('alt') || '';
+      const label = esc(alt.length > 8 ? alt.slice(0, 8) + '…' : alt);
+      const icons = { '人物': '👤', '自然风景': '🏞', '动物': '🐾', '建筑城市': '🏙', '运动体育': '⚽', '交通工具': '🚗', '食物': '🍽', '服饰时尚': '👗', '商业科技': '💼', '游戏娱乐': '🎮', '艺术': '🎨', '其他': '🖼' };
+      const icon = icons[cat] || '🖼';
+      const w = img.width || 400, h = img.height || 300;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="%23f3f4f6"/><text x="50%" y="45%" text-anchor="middle" font-size="${Math.min(w, h) * 0.18}" dominant-baseline="central">${icon}</text><text x="50%" y="68%" text-anchor="middle" font-size="${Math.min(w, h) * 0.07}" fill="%239ca3af" font-family="system-ui,sans-serif" dominant-baseline="central">${label}</text></svg>`;
+      img.src = 'data:image/svg+xml,' + svg;
+    }, true);
+  </script>
+</head>
+
+<body class="bg-background text-on-surface font-sans pattern-geometric">
+
+  <!-- 顶部 Header（二级页有返回按钮） -->
+  <header class="bg-background sticky top-0 z-40 h-14 flex items-center justify-between px-4">
+    <button id="btn-back" class="w-10 h-10 flex items-center justify-center text-on-surface-variant rounded-full
+                   hover:bg-surface-container active:bg-surface-container-high transition-colors" aria-label="返回">
+      <i data-lucide="arrow-left" class="w-5 h-5"></i>
+    </button>
+    <h1 class="text-base font-semibold text-on-surface">礼物模板</h1>
+    <button id="btn-more" class="w-10 h-10 flex items-center justify-center text-on-surface-variant rounded-full
+                   hover:bg-surface-container transition-colors" aria-label="更多">
+      <i data-lucide="ellipsis-vertical" class="w-5 h-5"></i>
+    </button>
+  </header>
+
+  <main class="overflow-y-auto pb-[calc(6rem+env(safe-area-inset-bottom))]">
+    <!-- @main-content:start -->
+    
+    <!-- 模板预览区 -->
+    <div class="px-4 pt-4">
+      <div class="relative frame-gold rounded-2xl overflow-hidden glow-gold corner-decoration">
+        <!-- 主预览图 -->
+        <img id="preview-main" 
+             src="https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=600&h=400&fit=crop" 
+             alt="中东风格礼物盒模板预览" 
+             data-category="艺术"
+             class="w-full aspect-[4/3] object-cover">
+        
+        <!-- 预览遮罩指示器 -->
+        <div class="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 bg-black/40 backdrop-blur-sm rounded-full py-2">
+          <i data-lucide="play-circle" class="w-5 h-5 text-white"></i>
+          <span class="text-white text-sm font-medium">点击预览动画效果</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 模板类型标签 -->
+    <div class="px-4 pt-4 flex items-center gap-2">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/15 text-primary">
+        <i data-lucide="sparkles" class="w-3 h-3 mr-1"></i>限时特供
+      </span>
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant">
+        生日礼物
+      </span>
+    </div>
+    
+    <!-- 模板信息 -->
+    <div class="px-4 pt-4">
+      <h2 id="template-name" class="text-xl font-bold text-on-surface">皇室星月夜</h2>
+      <p class="text-sm text-on-surface-variant mt-1">Royal Starlit Night</p>
+    </div>
+    
+    <!-- 模板说明 -->
+    <div class="px-4 pt-4">
+      <div class="bg-surface rounded-xl p-4 shadow-card">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="gem" class="w-4 h-4 text-primary"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-on-surface">模板说明</p>
+            <p class="text-sm text-on-surface-variant mt-1 leading-relaxed">
+              融合阿拉伯几何花纹与皇室奢华元素，深蓝底色点缀金色星月装饰，呈现神秘而高贵的视觉盛宴。适合送给追求品质与独特品味的朋友。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 模板特色 -->
+    <div class="px-4 pt-4">
+      <h3 class="text-base font-semibold text-on-surface mb-3">模板特色</h3>
+      <div class="grid grid-cols-3 gap-3">
+        <!-- 特色1 -->
+        <div class="bg-surface rounded-xl p-3 text-center shadow-card">
+          <div class="w-10 h-10 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-2">
+            <i data-lucide="moon" class="w-5 h-5 text-primary"></i>
+          </div>
+          <p class="text-xs font-medium text-on-surface">星月主题</p>
+        </div>
+        <!-- 特色2 -->
+        <div class="bg-surface rounded-xl p-3 text-center shadow-card">
+          <div class="w-10 h-10 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-2">
+            <i data-lucide="sparkles" class="w-5 h-5 text-primary"></i>
+          </div>
+          <p class="text-xs font-medium text-on-surface">金色点缀</p>
+        </div>
+        <!-- 特色3 -->
+        <div class="bg-surface rounded-xl p-3 text-center shadow-card">
+          <div class="w-10 h-10 mx-auto rounded-full bg-primary/10 flex items-center justify-center mb-2">
+            <i data-lucide="layout" class="w-5 h-5 text-primary"></i>
+          </div>
+          <p class="text-xs font-medium text-on-surface">多层动画</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 动画预览区 -->
+    <div class="px-4 pt-6">
+      <h3 class="text-base font-semibold text-on-surface mb-3">动画预览</h3>
+      <div class="bg-surface rounded-xl overflow-hidden shadow-card">
+        <!-- 预览帧缩略图 -->
+        <div class="p-4">
+          <div class="relative rounded-lg overflow-hidden bg-surface-container">
+            <img id="preview-animation" 
+                 src="https://images.unsplash.com/photo-1533038590840-1cde6e668a91?w=500&h=300&fit=crop" 
+                 alt="动画预览帧" 
+                 data-category="艺术"
+                 class="w-full aspect-video object-cover animating">
+            
+            <!-- 播放按钮覆盖层 -->
+            <button id="btn-play-preview" class="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors">
+              <div class="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
+                <i data-lucide="play" class="w-7 h-7 text-primary ml-1"></i>
+              </div>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 动画说明 -->
+        <div class="px-4 pb-4">
+          <div class="flex items-center justify-between text-xs text-on-surface-variant">
+            <span>动画时长：约 8 秒</span>
+            <span>循环播放</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 使用统计 -->
+    <div class="px-4 pt-6">
+      <div class="bg-surface rounded-xl p-4 shadow-card">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="users" class="w-4 h-4 text-on-surface-variant"></i>
+            <span class="text-sm text-on-surface-variant">已有</span>
+            <span class="text-sm font-semibold text-primary">2,847</span>
+            <span class="text-sm text-on-surface-variant">人使用</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i data-lucide="star" class="w-4 h-4 text-warning"></i>
+            <span class="text-sm font-semibold text-on-surface">4.9</span>
+            <span class="text-sm text-on-surface-variant">(328 评价)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 底部操作栏占位 -->
+    <div class="h-24"></div>
+    
+    <!-- @main-content:end -->
+  </main>
+
+  <!-- 底部固定操作栏 -->
+  <div class="fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-outline-variant/20
+              pb-[env(safe-area-inset-bottom)] pt-3 px-4">
+    <div class="flex items-center gap-3">
+      <!-- 收藏按钮 -->
+      <button id="btn-favorite" class="w-14 h-14 flex items-center justify-center rounded-xl
+                     bg-surface-container hover:bg-surface-container-high transition-colors
+                     active:scale-95" aria-label="收藏">
+        <i data-lucide="heart" class="w-6 h-6 text-on-surface-variant"></i>
+      </button>
+      
+      <!-- 开始创作按钮 -->
+      <button id="btn-create" class="flex-1 h-14 btn-gold-gradient text-white rounded-xl
+                     text-base font-semibold flex items-center justify-center gap-2
+                     transition-all">
+        <i data-lucide="wand-2" class="w-5 h-5"></i>
+        开始创作
+      </button>
+    </div>
+  </div>
+
+  <script>lucide.createIcons();</script>
+  
+  <script>
+    $(function() {
+      // 导航辅助函数
+      function navBack() {
+        console.log('[原型演示] BACK 返回上一页');
+        if(window.history.length > 1) window.history.back();
+      }
+      
+      function navPush(route) {
+        console.log('[原型演示] PUSH 到: ' + route);
+        window.location.href = route;
+      }
+      
+      function navReplace(route) {
+        console.log('[原型演示] REPLACE 为: ' + route);
+        window.location.replace(route);
+      }
+      
+      function navReset(route) {
+        console.log('[原型演示] RESET 到: ' + route);
+        window.location.href = route;
+      }
+      
+      // 返回按钮
+      $('#btn-back').on('click', function(e) {
+        e.preventDefault();
+        navBack();
+      });
+      
+      // 更多按钮 - 显示操作菜单
+      $('#btn-more').on('click', function() {
+        console.log('显示更多操作菜单');
+        // 后续应实现：
+        // 1. 底部弹出操作菜单（分享、举报、不感兴趣等）
+        // 2. 菜单使用与详情页一致的中东金色主题
+        // 3. 点击外部自动关闭
+        alert('更多功能：分享、举报、添加到收藏夹');
+      });
+      
+      // 收藏按钮 - 切换收藏状态
+      let isFavorited = false;
+      $('#btn-favorite').on('click', function() {
+        isFavorited = !isFavorited;
+        const $btn = $(this);
+        const $icon = $btn.find('i');
+        
+        if (isFavorited) {
+          // 收藏状态
+          $icon.attr('data-lucide', 'heart');
+          $icon.css('color', 'var(--color-primary)');
+          $btn.css('background-color', 'var(--color-primary-container)');
+          console.log('已收藏模板');
+        } else {
+          // 未收藏状态
+          $icon.attr('data-lucide', 'heart');
+          $icon.css('color', 'var(--color-on-surface-variant)');
+          $btn.css('background-color', '');
+          console.log('已取消收藏');
+        }
+        
+        // 刷新图标
+        lucide.createIcons();
+      });
+      
+      // 主预览图点击 - 全屏预览
+      $('#preview-main').on('click', function() {
+        console.log('全屏预览模板');
+        // 后续应实现：
+        // 1. 弹出全屏预览层
+        // 2. 支持手势缩放和滑动切换
+        // 3. 显示模板的各个视角
+        alert('全屏预览功能');
+      });
+      
+      // 动画预览播放按钮
+      $('#btn-play-preview').on('click', function() {
+        console.log('播放动画预览');
+        // 后续应实现：
+        // 1. 播放 GIF 或视频动画
+        // 2. 显示播放进度条
+        // 3. 支持暂停/继续
+        alert('动画预览：星月闪烁 + 金色粒子效果');
+      });
+      
+      // 开始创作按钮
+      $('#btn-create').on('click', function() {
+        const templateId = 'royal-starlit-night';
+        console.log('开始创作，使用模板: ' + templateId);
+        // 跳转到创作页面，传递模板ID
+        navPush('create.html?template=' + templateId);
+      });
+    });
+  </script>
+</body>
+
+</html>
