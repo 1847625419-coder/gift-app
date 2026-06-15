@@ -1,0 +1,6 @@
+{
+  "framework": null,
+  "buildCommand": "pnpm install --ignore-engines && pnpm run web",
+  "outputDirectory": ".next",
+  "installCommand": "pnpm install --ignore-engines"
+}
