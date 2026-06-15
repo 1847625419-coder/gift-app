@@ -1,6 +1,5 @@
 {
   "framework": null,
-  "buildCommand": "pnpm install --ignore-engines --ignore-scripts && pnpm run web",
-  "outputDirectory": ".next",
-  "installCommand": "pnpm install --ignore-engines --ignore-scripts"
+  "buildCommand": "npm install && npm run web",
+  "outputDirectory": ".next"
 }
