@@ -1,0 +1,13 @@
+{
+  "name": "gift-app-server",
+  "version": "1.0.0",
+  "build": {
+    "builder": "@vercel/ncc",
+    "config": {}
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}
