@@ -1,11 +1,3 @@
 {
-  "$schema": "https://railway.app/railway.schema.json",
-  "build": {
-    "command": "curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs && cd client && npm install && npx expo export --platform web"
-  },
-  "deploy": {
-    "numReplicas": 1,
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
-  }
+  "dockerfile": "Dockerfile"
 }
