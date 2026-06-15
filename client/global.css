@@ -137,6 +137,11 @@
       --surface-shadow: 0 0 0 0 transparent inset; /* No shadow on dark mode */
       --overlay-shadow: 0 0 1px 0 rgba(255, 255, 255, 0.2) inset;
       --field-shadow: 0 0 0 0 transparent inset; /* Transparent shadow to allow ring utilities to work */
+
+      /* 自定义：中东风格金色 */
+      --color-gold: #D4AF37;          /* 暗金色 - 亮色版本 */
+      --color-gold-light: #F5D78E;    /* 亮金色 */
+      --color-gold-pale: #4A4028;     /* 浅金色 - 深色版本 */
     }
   }
 }

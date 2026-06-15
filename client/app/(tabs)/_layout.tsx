@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Home, Wand2, FolderHeart } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
@@ -30,8 +30,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: '首页',
-          tabBarIcon: ({ color }) => (
-            <Home size={22} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -39,8 +39,8 @@ export default function TabLayout() {
         name="create"
         options={{
           title: '创作',
-          tabBarIcon: ({ color }) => (
-            <Wand2 size={22} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'color-wand' : 'color-wand-outline'} size={22} color={color} />
           ),
         }}
       />
@@ -48,8 +48,8 @@ export default function TabLayout() {
         name="gallery"
         options={{
           title: '我的作品',
-          tabBarIcon: ({ color }) => (
-            <FolderHeart size={22} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={22} color={color} />
           ),
         }}
       />
